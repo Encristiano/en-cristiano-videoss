@@ -207,14 +207,14 @@ def bolt(c, x, y, s):
     c.move_to(x + 20*s, y - 130*s); c.line_to(x - 70*s, y + 15*s); c.line_to(x - 5*s, y + 15*s)
     c.line_to(x - 30*s, y + 130*s); c.line_to(x + 75*s, y - 30*s); c.line_to(x + 10*s, y - 30*s); c.close_path(); fs(c, HIL, 8*s)
 
-def calendar(c, x, y, s, t=0):
+def calendar(c, x, y, s, t=0, label="IPC"):
     rrect(c, x - 100*s, y - 100*s, 200*s, 200*s, 18*s); fs(c, WHITE, 8*s)
     c.save(); rrect(c, x - 100*s, y - 100*s, 200*s, 200*s, 18*s); c.clip()
     c.rectangle(x - 100*s, y - 100*s, 200*s, 55*s); c.set_source_rgb(*RED); c.fill(); c.restore()
     rrect(c, x - 100*s, y - 100*s, 200*s, 200*s, 18*s); c.set_source_rgb(*INK); c.set_line_width(8*s); c.stroke()
     m = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN"][int(t*1.5) % 6]
     text(c, m, x, y - 73*s, 34*s, WHITE)
-    text(c, "IPC", x, y + 35*s, 58*s, INK)
+    text(c, label, x, y + 35*s, (58 if len(label) <= 4 else 44)*s, INK)
 
 def arrowdown(c, x, y, s, up=False):
     d = -1 if up else 1
@@ -288,9 +288,9 @@ def elder(c, x, y, s, t=0):
     c.move_to(x + 110*s, y - 10*s); c.line_to(x + 110*s, y + 120*s); c.stroke()
     c.arc(x + 95*s, y - 10*s, 15*s, math.pi, 2*math.pi); c.stroke()
 
-def docs(c, x, y, s):
+def docs(c, x, y, s, label="DEUDA"):
     for k in range(3):
-        doc(c, x - 50*s + k*50*s, y + 20*s - k*20*s, 0.8*s, "DEUDA")
+        doc(c, x - 50*s + k*50*s, y + 20*s - k*20*s, 0.8*s, label)
 
 PROPS = dict(coin=lambda c, x, y, s, t, it: coin(c, x, y, 105*s, spin=math.cos(t*3), smile=math.cos(t*3) > 0),
              cart=lambda c, x, y, s, t, it: cart(c, x, y, s),
@@ -302,7 +302,7 @@ PROPS = dict(coin=lambda c, x, y, s, t, it: coin(c, x, y, 105*s, spin=math.cos(t
              ecb=lambda c, x, y, s, t, it: ecb(c, x, y + 25*s, s),
              bank=lambda c, x, y, s, t, it: bank(c, x, y + 25*s, s),
              doc=lambda c, x, y, s, t, it: doc(c, x, y, s, it.get("text", "DOC")),
-             docs=lambda c, x, y, s, t, it: docs(c, x, y, s),
+             docs=lambda c, x, y, s, t, it: docs(c, x, y, s, it.get("ptext", "DEUDA")),
              printer=lambda c, x, y, s, t, it: printer(c, x, y, s, t),
              note=lambda c, x, y, s, t, it: note(c, x, y, 220*s, 115*s, "50", rot=-0.08),
              factory=lambda c, x, y, s, t, it: factory(c, x, y, s, t),
@@ -314,7 +314,7 @@ PROPS = dict(coin=lambda c, x, y, s, t, it: coin(c, x, y, 105*s, spin=math.cos(t
              bed=lambda c, x, y, s, t, it: bed(c, x, y, s, t),
              bolt=lambda c, x, y, s, t, it: bolt(c, x, y, s),
              bread=lambda c, x, y, s, t, it: bread(c, x, y, 1.1*s),
-             calendar=lambda c, x, y, s, t, it: calendar(c, x, y, s, t),
+             calendar=lambda c, x, y, s, t, it: calendar(c, x, y, s, t, it.get("ptext", "IPC")),
              arrowdown=lambda c, x, y, s, t, it: arrowdown(c, x, y, s),
              chartup=lambda c, x, y, s, t, it: chartup(c, x, y, s, t),
              clock=lambda c, x, y, s, t, it: clock(c, x, y, s, t),
@@ -338,7 +338,7 @@ def tpl_title(c, t, i, sp):
     scaled(c, CX - 190, 740, q); mascot(c, CX - 190, 740 + 8*math.sin(t*6), 115); c.restore()
     q = pop(t, 0.0)
     if q > 0:
-        scaled(c, CX + 190, 730, q); PROPS[sp["prop"]](c, CX + 190, 730 + 8*math.sin(t*5 + 1), 0.9, t, {}); c.restore()
+        scaled(c, CX + 190, 730, q); PROPS[sp["prop"]](c, CX + 190, 730 + 8*math.sin(t*5 + 1), 0.9, t, {"text": sp["ptext"], "ptext": sp["ptext"]} if "ptext" in sp else {}); c.restore()
     for k, ln in enumerate(sp["lines"]):
         q = pop(t, 0.05 + 0.15*k)
         if q > 0:

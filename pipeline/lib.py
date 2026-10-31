@@ -180,7 +180,7 @@ def note(c, x, y, w, h, label="50", rot=0):
 def phone(c, x, y, s, amount):
     rrect(c, x - 75*s, y - 130*s, 150*s, 260*s, 26*s); fs(c, hx("3A3A4A"), 8*s)
     rrect(c, x - 60*s, y - 108*s, 120*s, 205*s, 14*s); fs(c, WHITE, 4*s)
-    text(c, amount, x, y - 10*s, 30*s, GREEN)
+    text(c, amount, x, y - 10*s, min(30, 200/max(len(amount), 1))*s, GREEN)
     c.set_source_rgb(*hx("E0E0E8"))
     for i in range(2):
         rrect(c, x - 45*s, y + 25*s + i*30*s, 90*s, 16*s, 8*s); c.fill()
