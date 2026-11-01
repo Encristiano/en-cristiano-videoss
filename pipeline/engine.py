@@ -13,7 +13,7 @@ from episodios import EPISODES
 
 OUT = os.path.join(HERE, "out")
 GAP = 0.12
-SAY = {"IRPF": "i erre pe efe", "IPC": "i pe ce", "BCE": "be ce e", "INE": "ine"}
+SAY = {"IRPF": "i erre pe efe", "UE": "u e", "IPC": "i pe ce", "BCE": "be ce e", "INE": "ine"}
 COLORS = dict(YEL=YEL, MINT=MINT, ROSE=ROSE, SKY=SKY, LAV=LAV, PEACH=PEACH, HIL=HIL, GREEN=GREEN, RED=RED)
 CARD = (60, 470, 960, 760)
 CX, CY = CARD[0] + CARD[2]/2, CARD[1] + CARD[3]/2
@@ -242,6 +242,9 @@ def ecb(c, x, y, s): building(c, x, y, s, hx("3B5BA9"), "BCE", stars=True)
 def gov(c, x, y, s): building(c, x, y, s, hx("E8B77A"), None, dome=True)
 def parliament(c, x, y, s): building(c, x, y, s, RED, "CORTES")
 def bank(c, x, y, s): building(c, x, y, s, GREEN, "BANCO")
+def commission(c, x, y, s): building(c, x, y, s, hx("3B5BA9"), "COMISIÓN", stars=True)
+def euparl(c, x, y, s): building(c, x, y, s, hx("7FA7E0"), "PARLAMENTO", dome=True)
+def council(c, x, y, s): building(c, x, y, s, hx("9C89D9"), "CONSEJO", stars=True)
 
 def thermo(c, x, y, s, t=0):
     rrect(c, x - 30*s, y - 140*s, 60*s, 220*s, 30*s); fs(c, WHITE, 8*s)
@@ -301,6 +304,9 @@ PROPS = dict(coin=lambda c, x, y, s, t, it: coin(c, x, y, 105*s, spin=math.cos(t
              parliament=lambda c, x, y, s, t, it: parliament(c, x, y + 25*s, s),
              ecb=lambda c, x, y, s, t, it: ecb(c, x, y + 25*s, s),
              bank=lambda c, x, y, s, t, it: bank(c, x, y + 25*s, s),
+             commission=lambda c, x, y, s, t, it: commission(c, x, y + 25*s, s),
+             euparl=lambda c, x, y, s, t, it: euparl(c, x, y + 25*s, s),
+             council=lambda c, x, y, s, t, it: council(c, x, y + 25*s, s),
              doc=lambda c, x, y, s, t, it: doc(c, x, y, s, it.get("text", "DOC")),
              docs=lambda c, x, y, s, t, it: docs(c, x, y, s, it.get("ptext", "DEUDA")),
              printer=lambda c, x, y, s, t, it: printer(c, x, y, s, t),
@@ -424,14 +430,14 @@ def tpl_crowd(c, t, i, sp):
         x = 140 + col*100; y = 700 + r*105
         q = pop(t, 0.1 + k*0.04)
         if q <= 0: continue
-        big = k < 6
+        big = k < sp.get("hl", 6)
         scaled(c, x, y, q)
         c.arc(x, y, 40, 0, 2*math.pi); fs(c, hx("3B5BA9") if big else heads[k % 6], 6)
         face(c, x, y, 40, "happy")
         c.restore()
     a = appear(t, 0.8)
     if a > 0:
-        text(c, "6 del Comité Ejecutivo  +  21 gobernadores", CX, 1055, 34, INK)
+        text(c, sp.get("caption", "6 del Comité Ejecutivo  +  21 gobernadores"), CX, 1055, 34, INK)
     b = sp.get("banner")
     if b: banner(c, b["text"], CX, 1160, 46, HIL, pop(t, at(i, b["key"])))
 
