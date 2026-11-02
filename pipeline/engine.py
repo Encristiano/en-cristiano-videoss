@@ -13,7 +13,7 @@ from episodios import EPISODES
 
 OUT = os.path.join(HERE, "out")
 GAP = 0.12
-SAY = {"IRPF": "i erre pe efe", "UE": "u e", "IPC": "i pe ce", "BCE": "be ce e", "INE": "ine"}
+SAY = {"IRPF": "i erre pe efe", "UE": "u e", "IPC": "i pe ce", "BCE": "be ce e", "INE": "ine", "IVA": "iva"}
 COLORS = dict(YEL=YEL, MINT=MINT, ROSE=ROSE, SKY=SKY, LAV=LAV, PEACH=PEACH, HIL=HIL, GREEN=GREEN, RED=RED)
 CARD = (60, 470, 960, 760)
 CX, CY = CARD[0] + CARD[2]/2, CARD[1] + CARD[3]/2
@@ -295,6 +295,45 @@ def docs(c, x, y, s, label="DEUDA"):
     for k in range(3):
         doc(c, x - 50*s + k*50*s, y + 20*s - k*20*s, 0.8*s, label)
 
+def tub(c, x, y, s, t=0, level=0.5):
+    # bañera: el agua sube según "level" (0-1)
+    for dx in (-95, 95):
+        c.arc(x + dx*s, y + 95*s, 16*s, 0, 2*math.pi); fs(c, hx("E8B77A"), 6*s)
+    rrect(c, x - 140*s, y - 50*s, 280*s, 145*s, 50*s); c.set_source_rgb(*WHITE); c.fill()
+    c.save(); rrect(c, x - 140*s, y - 50*s, 280*s, 145*s, 50*s); c.clip()
+    lv = clamp(level*clamp(t/0.8 + 0.3))
+    wy = y + 95*s - 145*s*lv
+    c.move_to(x - 150*s, wy)
+    for k in range(13):
+        c.line_to(x - 150*s + k*25*s, wy + 6*s*math.sin(t*6 + k))
+    c.line_to(x + 150*s, y + 100*s); c.line_to(x - 150*s, y + 100*s); c.close_path()
+    c.set_source_rgb(*hx("7FB8E6")); c.fill(); c.restore()
+    rrect(c, x - 140*s, y - 50*s, 280*s, 145*s, 50*s); c.set_source_rgb(*INK); c.set_line_width(8*s); c.stroke()
+    rrect(c, x - 155*s, y - 62*s, 310*s, 24*s, 12*s); fs(c, WHITE, 7*s)
+    c.set_source_rgb(*INK); c.set_line_width(14*s); c.set_line_cap(cairo.LINE_CAP_ROUND)
+    c.move_to(x - 115*s, y - 62*s); c.line_to(x - 115*s, y - 120*s); c.line_to(x - 75*s, y - 120*s); c.line_to(x - 75*s, y - 100*s); c.stroke()
+    drop(c, x - 75*s, y - 75*s + ((t*1.5) % 1)*30*s, 0.7*s)
+
+def flag(c, x, y, s, t=0, stripes=(RED, YEL, RED), widths=(1, 2, 1)):
+    w, h = 240*s, 160*s; tot = sum(widths)
+    c.set_source_rgb(*INK); c.set_line_width(12*s); c.set_line_cap(cairo.LINE_CAP_ROUND)
+    c.move_to(x - w/2 - 10*s, y - h/2 - 20*s); c.line_to(x - w/2 - 10*s, y + h/2 + 60*s); c.stroke()
+    c.save(); rrect(c, x - w/2, y - h/2, w, h, 10*s); c.clip()
+    yy = y - h/2
+    for col, wd in zip(stripes, widths):
+        c.rectangle(x - w/2, yy, w, h*wd/tot + 1); c.set_source_rgb(*col); c.fill(); yy += h*wd/tot
+    c.restore()
+    rrect(c, x - w/2, y - h/2, w, h, 10*s); c.set_source_rgb(*INK); c.set_line_width(8*s); c.stroke()
+
+def table(c, x, y, s):
+    c.set_source_rgb(*INK)
+    for dx in (-100, 100):
+        rrect(c, x + dx*s - 13*s, y - 20*s, 26*s, 130*s, 8*s); fs(c, hx("C98B5E"), 7*s)
+    rrect(c, x - 150*s, y - 55*s, 300*s, 45*s, 12*s); fs(c, hx("E0A878"), 8*s)
+    c.set_source_rgb(*hx("C98B5E")); c.set_line_width(5*s)
+    c.move_to(x - 120*s, y - 33*s); c.line_to(x - 20*s, y - 33*s); c.stroke()
+    c.move_to(x + 30*s, y - 40*s); c.line_to(x + 110*s, y - 40*s); c.stroke()
+
 PROPS = dict(coin=lambda c, x, y, s, t, it: coin(c, x, y, 105*s, spin=math.cos(t*3), smile=math.cos(t*3) > 0),
              cart=lambda c, x, y, s, t, it: cart(c, x, y, s),
              pricetag=lambda c, x, y, s, t, it: pricetag(c, x, y, s),
@@ -328,7 +367,11 @@ PROPS = dict(coin=lambda c, x, y, s, t, it: coin(c, x, y, 105*s, spin=math.cos(t
              thermo=lambda c, x, y, s, t, it: thermo(c, x, y, s, t),
              percent=lambda c, x, y, s, t, it: percent(c, x, y, s, t),
              people=lambda c, x, y, s, t, it: people(c, x, y, s, t),
-             elder=lambda c, x, y, s, t, it: elder(c, x, y, s, t))
+             elder=lambda c, x, y, s, t, it: elder(c, x, y, s, t),
+             tub=lambda c, x, y, s, t, it: tub(c, x, y, s, t, it.get("level", 0.5)),
+             flag_es=lambda c, x, y, s, t, it: flag(c, x, y, s, t, (RED, HIL, RED), (1, 2, 1)),
+             flag_de=lambda c, x, y, s, t, it: flag(c, x, y, s, t, (INK, RED, HIL), (1, 1, 1)),
+             table=lambda c, x, y, s, t, it: table(c, x, y, s))
 
 def eur(n):
     return f"{n:,.0f} €".replace(",", ".")
